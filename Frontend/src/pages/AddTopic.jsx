@@ -1,26 +1,38 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import API from "../services/api";
 
-const AddDomain = () => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+const AddTopic = () => {
 
+  const { domain } = useParams();
   const navigate = useNavigate();
+
+  const [name, setName] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!name || !videoUrl) {
+      alert("Please fill all fields");
+      return;
+    }
+
     try {
-      await API.post("/domains", {
+
+      await API.post("/topics", {
         name,
-        description,
+        videoUrl,
+        domainId: domain
       });
+
+      alert("Topic added successfully");
 
       navigate("/admin");
 
     } catch (err) {
-      alert(err.response?.data?.message);
+      console.error(err);
+      alert("Failed to create topic");
     }
   };
 
@@ -29,29 +41,29 @@ const AddDomain = () => {
 
       <form
         onSubmit={handleSubmit}
-        className="bg-gray-900 p-10 rounded-xl w-full max-w-md"
+        className="bg-gray-900 p-10 rounded-xl w-full max-w-lg"
       >
 
         <h1 className="text-2xl font-bold mb-6">
-          Add Domain
+          Add Topic
         </h1>
 
         <input
-          placeholder="Domain Name"
+          placeholder="Topic Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="w-full mb-4 p-3 bg-gray-800 rounded"
         />
 
-        <textarea
-          placeholder="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
+        <input
+          placeholder="YouTube Video URL"
+          value={videoUrl}
+          onChange={(e) => setVideoUrl(e.target.value)}
           className="w-full mb-6 p-3 bg-gray-800 rounded"
         />
 
         <button className="bg-indigo-600 px-6 py-2 rounded w-full">
-          Create Domain
+          Create Topic
         </button>
 
       </form>
@@ -60,4 +72,4 @@ const AddDomain = () => {
   );
 };
 
-export default AddDomain;
+export default AddTopic;

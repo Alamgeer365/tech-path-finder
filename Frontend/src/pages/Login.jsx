@@ -1,77 +1,78 @@
-import { useState, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { loginUser } from "../services/authService";
 import { AuthContext } from "../context/auth-context";
 
-const Login = () => {
-  const { login } = useContext(AuthContext);
+function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // TEMPORARY FAKE LOGIN (Backend later)
-    if (formData.email && formData.password) {
-      login({ email: formData.email });
-      navigate("");
+    try {
+      const res = await loginUser({
+        email,
+        password,
+      });
+
+      login(res.data.user, res.data.token);
+      navigate("/dashboard");
+    } catch (err) {
+      alert(err.response?.data?.message || "Login failed");
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[80vh] px-4">
-      <div className="bg-white shadow-xl rounded-2xl w-full max-w-md p-8">
-        <h2 className="text-3xl font-bold text-center text-blue-600 mb-6">
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 w-full max-w-md shadow-lg">
+        <h2 className="text-3xl font-bold text-white mb-6 text-center">
           Welcome Back
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block mb-1 text-sm font-medium">Email</label>
-            <input
-              type="email"
-              name="email"
-              required
-              onChange={handleChange}
-              className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
+        <p className="text-gray-400 text-center mb-6">
+          Login to continue your learning journey
+        </p>
 
-          <div>
-            <label className="block mb-1 text-sm font-medium">Password</label>
-            <input
-              type="password"
-              name="password"
-              required
-              onChange={handleChange}
-              className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <input
+            type="email"
+            placeholder="Email"
+            className="w-full bg-gray-800 text-white p-3 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full bg-gray-800 text-white p-3 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 transition p-3 rounded-lg font-semibold"
           >
             Login
           </button>
         </form>
 
-        <p className="text-sm text-center mt-4">
-          Don’t have an account?{" "}
-          <Link to="/register" className="text-blue-600 hover:underline">
+        <p className="text-gray-400 text-center mt-6">
+          Don't have an account?{" "}
+          <span
+            className="text-indigo-500 cursor-pointer hover:underline"
+            onClick={() => navigate("/register")}
+          >
             Register
-          </Link>
+          </span>
         </p>
       </div>
     </div>
   );
-};
+}
 
 export default Login;

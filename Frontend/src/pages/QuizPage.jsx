@@ -1,28 +1,64 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { quizData } from "../data/quizData";
+import API from "../services/api";
 
 const QuizPage = () => {
-  const { domain } = useParams();
+  const { topicId } = useParams();
   const navigate = useNavigate();
-  const decodedDomain = decodeURIComponent(domain);
 
   const [questions, setQuestions] = useState([]);
   const [started, setStarted] = useState(false);
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
-  const [score, setScore] = useState(0);
+  const [answers, setAnswers] = useState([]);
   const [timeLeft, setTimeLeft] = useState(30);
 
-  // Load questions
   useEffect(() => {
-    setQuestions(quizData[decodedDomain] || []);
-    window.scrollTo(0, 0);
-  }, [decodedDomain]);
+    const fetchQuestions = async () => {
+      try {
+        const res = await API.get(`/questions/topic/${topicId}`);
+        setQuestions(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-  // Timer Logic
+    fetchQuestions();
+  }, [topicId]);
+
+  const handleNext = async () => {
+    const updatedAnswers = [
+      ...answers,
+      {
+        questionId: questions[current]._id,
+        selectedOption: selected,
+      },
+    ];
+    setAnswers(updatedAnswers);
+
+    setSelected(null);
+    setTimeLeft(30);
+
+    if (current + 1 < questions.length) {
+      setCurrent((prev) => prev + 1);
+    } else {
+      try {
+        const res = await API.post("/quiz/submit", {
+          topicId,
+          answers: updatedAnswers,
+        });
+
+        navigate(`/score/${topicId}`, {
+          state: res.data,
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
   useEffect(() => {
-    if (!started) return;
+    if (!started || !questions.length) return;
 
     if (timeLeft === 0) {
       handleNext();
@@ -34,76 +70,8 @@ const QuizPage = () => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [timeLeft, started]);
+  }, [timeLeft, started, questions.length]);
 
-  const handleNext = () => {
-    let updatedScore = score;
-
-    if (selected === questions[current]?.answer) {
-      updatedScore = score + 1;
-      setScore(updatedScore);
-    }
-
-    setSelected(null);
-    setTimeLeft(30);
-
-    if (current + 1 < questions.length) {
-      setCurrent((prev) => prev + 1);
-    } else {
-      // Save result (future backend ready)
-      const prevScores =
-        JSON.parse(localStorage.getItem("quizScores")) || {};
-
-      prevScores[decodedDomain] = {
-        score: updatedScore,
-        total: questions.length,
-        date: new Date().toISOString(),
-      };
-
-      localStorage.setItem(
-        "quizScores",
-        JSON.stringify(prevScores)
-      );
-
-      // Navigate to ScoreCard page
-      navigate(`/score/${encodeURIComponent(decodedDomain)}`, {
-        state: {
-          score: updatedScore,
-          total: questions.length,
-        },
-      });
-    }
-  };
-
-  // =========================
-  // GET READY SCREEN
-  // =========================
-  if (!started) {
-    return (
-      <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center px-6 text-center">
-        <h1 className="text-4xl font-bold mb-6">
-          {decodedDomain} Quiz
-        </h1>
-
-        <p className="text-gray-400 mb-4">
-          {questions.length} Questions • 30 Seconds Each
-        </p>
-
-        <p className="text-lg mb-8">
-          Ready to challenge yourself?
-        </p>
-
-        <button
-          onClick={() => setStarted(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 px-8 py-3 rounded-xl font-semibold transition"
-        >
-          Start Quiz 🚀
-        </button>
-      </div>
-    );
-  }
-
-  // Safety fallback
   if (!questions.length) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white">
@@ -112,56 +80,54 @@ const QuizPage = () => {
     );
   }
 
+  if (!started) {
+    return (
+      <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center text-center">
+        <h1 className="text-4xl font-bold mb-6">Quiz</h1>
+
+        <p className="text-gray-400 mb-4">
+          {questions.length} Questions, 30 Seconds Each
+        </p>
+
+        <button
+          onClick={() => setStarted(true)}
+          className="bg-indigo-600 px-8 py-3 rounded-xl"
+        >
+          Start Quiz
+        </button>
+      </div>
+    );
+  }
+
   const question = questions[current];
   const timeProgress = (timeLeft / 30) * 100;
-  const quizProgress =
-    ((current + 1) / questions.length) * 100;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white px-6 md:px-12 py-10">
-
-      {/* Top Info */}
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-semibold">
+    <div className="min-h-screen bg-gray-950 text-white px-10 py-10">
+      <div className="flex justify-between mb-4">
+        <h1>
           Question {current + 1} / {questions.length}
         </h1>
-        <span className="text-red-400 font-bold">
-          {timeLeft}s
-        </span>
+        <span className="text-red-400">{timeLeft}s</span>
       </div>
 
-      {/* TIME PROGRESS BAR */}
-      <div className="w-full bg-gray-800 rounded-full h-2 mb-6">
+      <div className="w-full bg-gray-800 h-2 mb-6 rounded">
         <div
-          className="bg-red-500 h-2 rounded-full transition-all duration-1000"
+          className="bg-red-500 h-2 rounded"
           style={{ width: `${timeProgress}%` }}
         />
       </div>
 
-      {/* QUIZ PROGRESS */}
-      <div className="w-full bg-gray-800 rounded-full h-2 mb-10">
-        <div
-          className="bg-indigo-500 h-2 rounded-full transition-all duration-300"
-          style={{ width: `${quizProgress}%` }}
-        />
-      </div>
-
-      {/* Question Card */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 max-w-3xl mx-auto shadow-xl">
-
-        <h2 className="text-xl font-semibold mb-6">
-          {question.question}
-        </h2>
+      <div className="bg-gray-900 p-8 rounded-xl max-w-3xl mx-auto">
+        <h2 className="text-xl mb-6">{question.question}</h2>
 
         <div className="space-y-4">
-          {question.options.map((option, index) => (
+          {question.options.map((option, i) => (
             <button
-              key={index}
-              onClick={() => setSelected(index)}
-              className={`w-full text-left px-4 py-3 rounded-lg transition ${
-                selected === index
-                  ? "bg-indigo-600"
-                  : "bg-gray-800 hover:bg-gray-700"
+              key={i}
+              onClick={() => setSelected(i)}
+              className={`w-full text-left p-3 rounded ${
+                selected === i ? "bg-indigo-600" : "bg-gray-800"
               }`}
             >
               {option}
@@ -173,20 +139,12 @@ const QuizPage = () => {
           <button
             disabled={selected === null}
             onClick={handleNext}
-            className={`px-6 py-2 rounded-lg transition ${
-              selected === null
-                ? "bg-gray-700 cursor-not-allowed"
-                : "bg-indigo-600 hover:bg-indigo-700"
-            }`}
+            className="bg-indigo-600 px-6 py-2 rounded disabled:opacity-50"
           >
-            {current + 1 === questions.length
-              ? "Finish"
-              : "Next"}
+            {current + 1 === questions.length ? "Finish" : "Next"}
           </button>
         </div>
-
       </div>
-
     </div>
   );
 };
