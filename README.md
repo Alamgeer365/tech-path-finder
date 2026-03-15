@@ -105,7 +105,7 @@ Tech-Path-Finder/
 
 ## Environment variables
 
-Create `Backend/.env` with the following values:
+Copy `Backend/.env.example` to `Backend/.env` and update the values for your environment:
 
 ```env
 PORT=5000
