@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 
 import Layout from "./components/Layout";
@@ -19,6 +20,10 @@ import AddTopic from "./pages/AddTopic";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
+  useEffect(() => {
+    document.title = "Tech Path Finder";
+  }, []);
+
   return (
     <Routes>
       <Route element={<Layout />}>
