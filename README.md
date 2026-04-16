@@ -1,121 +1,76 @@
 # Tech Path Finder
 
-Tech Path Finder is a full-stack learning platform that helps users explore technology domains, watch topic-based video lessons, take quizzes, and track learning progress through analytics. It combines a React-based learner experience with an Express and MongoDB backend that supports authentication, role-based admin actions, content management, and quiz performance reporting.
+Tech Path Finder is a full-stack MERN learning platform that helps students explore curated tech domains, study topic-based video lectures, and reinforce learning with timed MCQ quizzes.
 
-## Why this project matters
+## What The App Does
 
-Most beginner learning platforms stop at static content. Tech Path Finder is designed as an interactive product:
+- Browse learning domains such as web development or other admin-created tracks
+- Open a domain and study topic-by-topic through embedded lecture videos
+- Attempt timed quizzes for each topic
+- Track quiz history and performance in a learner dashboard
+- Get personalized next-step recommendations based on quiz attempts
+- Manage domains, topics, quizzes, and users from an admin panel
 
-- learners can browse curated domains and drill down into topic-level content
-- each topic can include a video resource and quiz questions
-- users can submit quiz attempts and review their performance over time
-- admins can manage domains, topics, and quiz content from the application
+## Tech Stack
 
-This makes the project closer to a real product workflow than a basic CRUD demo.
+- Frontend: React, Vite, React Router, Tailwind CSS, Axios
+- Backend: Node.js, Express, MongoDB, Mongoose, JWT authentication
 
-## Core capabilities
-
-- JWT-based authentication with protected routes
-- role-based access control for admin-only content management
-- domain, topic, and question management APIs
-- quiz submission flow with score and percentage calculation
-- learner analytics dashboard for quiz history and performance trends
-- responsive React frontend with route-based navigation
-- REST API architecture using Express and MongoDB
-
-## Product walkthrough
-
-### Student experience
-
-- register and log in
-- explore available tech domains from the home page
-- open a domain to see its learning topics
-- launch a quiz for a selected topic
-- view score feedback after submission
-- track quiz history and performance insights from the profile page
-
-### Admin experience
-
-- create new learning domains
-- add topics to a domain
-- attach quiz questions to a topic
-- remove outdated domains, topics, and questions
-
-## Tech stack
-
-### Frontend
-
-- React 19
-- React Router 7
-- Vite
-- Tailwind CSS 4
-- Axios
-
-### Backend
-
-- Node.js
-- Express 5
-- MongoDB
-- Mongoose
-- JWT authentication
-- bcryptjs
-- dotenv
-
-## Architecture
-
-```text
-Frontend (React + Vite)
-  -> Axios API client
-  -> Express REST API
-  -> MongoDB via Mongoose
-```
-
-### Backend modules
-
-- `auth`: registration, login, current-user lookup
-- `domains`: public listing and admin-managed creation/deletion
-- `topics`: public topic retrieval by domain and admin-managed topic creation/deletion
-- `questions`: public quiz question retrieval by topic and admin-managed question creation/deletion
-- `quiz`: quiz submission and user attempt history
-- `analytics`: user progress and average-score reporting
-
-## Repository structure
+## Project Structure
 
 ```text
 Tech-Path-Finder/
-|-- Backend/
-|   |-- config/
-|   |-- controllers/
-|   |-- middleware/
-|   |-- models/
-|   |-- routes/
-|   |-- package.json
-|   `-- server.js
 |-- Frontend/
 |   |-- src/
 |   |   |-- components/
 |   |   |-- context/
 |   |   |-- pages/
 |   |   `-- services/
-|   `-- package.json
+|   `-- .env.example
+|-- Backend/
+|   |-- config/
+|   |-- controllers/
+|   |-- middleware/
+|   |-- models/
+|   |-- routes/
+|   |-- server.js
+|   `-- .env.example
+>>>>>>> eafb4e7 (Update project setup and access controls)
 |-- start-backend.cmd
 |-- start-frontend.cmd
 `-- start-project.cmd
 ```
 
-## Environment variables
+## Features
 
-Copy `Backend/.env.example` to `Backend/.env` and update the values for your environment:
+### Student Features
 
-```env
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-```
+- Create an account and log in
+- Explore all available learning paths
+- Watch lecture videos inside the topic page
+- Take timed quiz questions for each topic
+- See score cards after quiz submission
+- View quiz history and progress insights
+- Receive personalized recommendations for what to study next
 
-The `.env` file is intentionally excluded from source control.
+### Admin Features
 
-## Local setup
+- Create and delete domains
+- Add and delete topics
+- Add quiz questions to topics
+- View registered users
+- Delete users from the admin dashboard
+- Restrict admin pages to authenticated admin accounts
+
+## Recent Improvements
+
+- Added environment-based frontend API configuration using `VITE_API_URL`
+- Protected learner-only and admin-only routes more safely
+- Added missing backend user management endpoints for the admin dashboard
+- Added example environment files for easier setup
+- Rewrote the root README to match the actual project behavior
+
+## Local Setup
 
 ### 1. Clone the repository
 
@@ -129,38 +84,63 @@ cd tech-path-finder
 ```bash
 cd Backend
 npm install
-```
-
-```bash
+cd ..
 cd Frontend
 npm install
 ```
 
-### 3. Start the application
+### 3. Configure environment variables
 
-Backend:
+Create these files from the included examples:
+
+- `Backend/.env`
+- `Frontend/.env`
+
+Backend example:
+
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=replace_with_a_secure_secret
+```
+
+Frontend example:
+
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+
+### 4. Run the backend
 
 ```bash
 cd Backend
 npm run dev
 ```
 
-Frontend:
+### 5. Run the frontend
 
 ```bash
 cd Frontend
 npm run dev
 ```
 
-You can also use the helper scripts in the repo root on Windows:
+The frontend usually runs on `http://localhost:5173` and the backend on `http://localhost:5000`.
 
-```bash
-start-backend.cmd
-start-frontend.cmd
-start-project.cmd
-```
+## Available Scripts
 
-## API overview
+### Frontend
+
+- `npm run dev` starts the Vite dev server
+- `npm run build` creates a production build
+- `npm run lint` runs ESLint
+- `npm run preview` previews the production build locally
+
+### Backend
+
+- `npm run dev` starts the backend with nodemon
+- `npm start` starts the backend with Node
+
+## API Overview
 
 ### Auth
 
@@ -177,6 +157,7 @@ start-project.cmd
 
 ### Topics
 
+- `GET /api/topics`
 - `GET /api/topics/domain/:domainId`
 - `POST /api/topics`
 - `DELETE /api/topics/:id`
@@ -187,28 +168,28 @@ start-project.cmd
 - `POST /api/questions`
 - `DELETE /api/questions/:id`
 
-### Quiz and analytics
+### Quiz And Analytics
 
 - `POST /api/quiz/submit`
 - `GET /api/quiz/my-attempts`
 - `GET /api/analytics/progress`
+- `GET /api/analytics/recommendation`
 
-Protected and admin-only routes require a valid bearer token.
+### Users
 
-## Engineering highlights
+- `GET /api/users`
+- `DELETE /api/users/:id`
 
-- separated frontend and backend for clearer ownership and scalability
-- organized backend by controller, model, middleware, and route responsibilities
-- reusable Axios client with auth token injection
-- persistent quiz-attempt storage to support analytics instead of only temporary UI scoring
-- role-aware workflow that supports both learner and administrator use cases
+## Notes
 
-## Current scope
+- Admin routes require a valid JWT and an `admin` role
+- Learner progress depends on quiz attempts stored in MongoDB
+- Environment files are ignored by Git, so use the example files for sharing setup
 
-This repository is focused on core product functionality: authentication, content delivery, quiz workflows, and learning analytics. It is a strong foundation for extending into recommendations, progress-based roadmaps, certificates, or deployment automation.
+## Future Ideas
 
-## Author
-
-**Alamgeer Shekh**
-
-- GitHub: [Alamgeer365](https://github.com/Alamgeer365)
+- Add edit/update support for domains, topics, and quiz questions
+- Add search and filtering for learning paths
+- Add topic ordering and completion tracking
+- Add unit and integration tests
+- Deploy frontend and backend with separate production environment configs

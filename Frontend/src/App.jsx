@@ -24,25 +24,52 @@ function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
 
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="/login" element={<Login />} />
 
         <Route path="/register" element={<Register />} />
-        <Route path="/admin/add-topic/:domain" element={<AddTopic />} />
 
         <Route path="/domain/:domain" element={<DomainPage />} />
 
-        <Route path="/quiz/:topicId" element={<QuizPage />} />
+        <Route
+          path="/quiz/:topicId"
+          element={
+            <ProtectedRoute>
+              <QuizPage />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/score/:topicId" element={<ScoreCard />} />
+        <Route
+          path="/score/:topicId"
+          element={
+            <ProtectedRoute>
+              <ScoreCard />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/profile" element={<Profile />} />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/admin"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute adminOnly>
               <AdminDashboard />
             </ProtectedRoute>
           }
@@ -51,8 +78,17 @@ function App() {
         <Route
           path="/admin/add-domain"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute adminOnly>
               <AddDomain />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/add-topic/:domain"
+          element={
+            <ProtectedRoute adminOnly>
+              <AddTopic />
             </ProtectedRoute>
           }
         />
@@ -60,7 +96,7 @@ function App() {
         <Route
           path="/admin/add-quiz/:domain"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute adminOnly>
               <AddQuiz />
             </ProtectedRoute>
           }
